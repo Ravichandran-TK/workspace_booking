@@ -55,7 +55,10 @@ func GetAvailableBookingSpace(c *fiber.Ctx) error {
 	toDate := c.Query("to_date")
 	startTime := c.Query("start_time")
 	endTime := c.Query("end_time")
-	floorId, _ := strconv.Atoi(reqFloorId)
+	floorId, err := strconv.Atoi(reqFloorId)
+	if err != nil {
+		return utility.ErrResponse(c, "Error in string convertion", 500, err)
+	}
 	timingParams := new(model.BookingTiming)
 	timingParams.FromDate = fromDate
 	timingParams.ToDate = toDate
@@ -65,12 +68,12 @@ func GetAvailableBookingSpace(c *fiber.Ctx) error {
 	fromDatetTime, toDateTime := model.BookingTimestamp(timingParams)
 
 	// getting booking worksapcesspace
-	availableWorkSpace := model.GetAvailableBookingSpace(floorId, fromDatetTime, toDateTime)
+	availableWorkSpace, err := model.GetAvailableBookingSpace(floorId, fromDatetTime, toDateTime)
 	if err := c.JSON(&fiber.Map{
 		"success": true,
 		"data":    availableWorkSpace,
 	}); err != nil {
-		return utility.ErrResponse(c, "Error in getting booking workspaces", 500, err)
+		return utility.ErrResponse(c, "Error in getting available booking", 500, err)
 	}
 	return nil
 }

@@ -59,8 +59,6 @@ type Bookings struct {
 
 type AvailableWorkspaces struct {
 	FloorDetails     Floor
-	FromDateTime     string `json:"from_datetime"`
-	ToDateTime       string `json:"to_datetime"`
 	BookedWorkSpaces []*BookedWorkSpace
 }
 
@@ -130,21 +128,25 @@ func BookingTimestamp(t *BookingTiming) (string, string) {
 	return fromDateTime, toDateTime
 }
 
-func GetAvailableBookingSpace(floorId int, fromDate, toDate string) AvailableWorkspaces {
+func GetAvailableBookingSpace(floorId int, fromDate, toDate string) (availableWorkSpaceDetails AvailableWorkspaces, err error) {
 	floor := GetFloorByID(floorId)
 
 	bookedWorkSpacesRecord := make([]*BookedWorkSpace, 0)
 
-	rows, _ := migration.DbPool.Query(context.Background(), "SELECT from_datetime as date, array_agg(workspace_id) as seats from booking_workspaces where floor_id = $1 and from_datetime between $2 and $3 and to_datetime between $4 and $5 group by from_datetime", floorId, fromDate, toDate, fromDate, toDate)
+	rows, err := migration.DbPool.Query(context.Background(), "SELECT from_datetime as date, array_agg(workspace_id) as seats from booking_workspaces where floor_id = $1 and from_datetime between $2 and $3 and to_datetime between $4 and $5 group by from_datetime", floorId, fromDate, toDate, fromDate, toDate)
 
 	defer rows.Close()
+
+	if err != nil {
+		fmt.Println("Failed to get available booking:", err)
+		return AvailableWorkspaces{}, err
+	}
 
 	for rows.Next() {
 		bookingRecord := new(BookedWorkSpace)
 		rows.Scan(&bookingRecord.BookedDate, &bookingRecord.WorkspaceIds)
 		bookedWorkSpacesRecord = append(bookedWorkSpacesRecord, bookingRecord)
 	}
-	availableWorkspaces := AvailableWorkspaces{FloorDetails: floor, FromDateTime: fromDate, ToDateTime: toDate, BookedWorkSpaces: bookedWorkSpacesRecord}
-
-	return availableWorkspaces
+	availableWorkspaces := AvailableWorkspaces{FloorDetails: floor, BookedWorkSpaces: bookedWorkSpacesRecord}
+	return availableWorkspaces, nil
 }
