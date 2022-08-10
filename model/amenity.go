@@ -24,8 +24,12 @@ type Amenities struct {
 }
 
 func GetAllAmenities() []*Amenity {
-	rows, _ := migration.DbPool.Query(context.Background(), "select amenities.id, amenities.name, amenities.is_present, amenities.workspace_id as workspace_id, workspaces.name as workspace_name, amenities.created_at, amenities.updated_at from amenities LEFT JOIN workspaces ON amenities.workspace_id = workspaces.id")
+	rows, err := migration.DbPool.Query(context.Background(), "select amenities.id, amenities.name, amenities.is_present, amenities.workspace_id as workspace_id, workspaces.name as workspace_name, amenities.created_at, amenities.updated_at from amenities LEFT JOIN workspaces ON amenities.workspace_id = workspaces.id")
 	defer rows.Close()
+	if err != nil {
+		fmt.Println("Failed to get amenities record :", err)
+		return []*Amenity{}
+	}
 
 	// declare empty post variable
 	amenities := make([]*Amenity, 0)
@@ -78,9 +82,13 @@ func GetAmenityByID(amenityId int) Amenity {
 }
 
 func GetAmenitiesByWorkSpaceID(WorkSpaceId int) []Amenity {
-	rows, _ := migration.DbPool.Query(context.Background(), "select amenities.id, amenities.name, amenities.is_present, amenities.workspace_id as workspace_id, workspaces.name as workspace_name, amenities.created_at, amenities.updated_at from amenities LEFT JOIN workspaces ON amenities.workspace_id = workspaces.id where amenities.workspace_id = $1", WorkSpaceId)
+	rows, err := migration.DbPool.Query(context.Background(), "select amenities.id, amenities.name, amenities.is_present, amenities.workspace_id as workspace_id, workspaces.name as workspace_name, amenities.created_at, amenities.updated_at from amenities LEFT JOIN workspaces ON amenities.workspace_id = workspaces.id where amenities.workspace_id = $1", WorkSpaceId)
 	defer rows.Close()
 	// declare amenities array
+	if err != nil {
+		fmt.Println("Failed to get amenities record :", err)
+		return []Amenity{}
+	}
 	amenities := make([]Amenity, 0)
 	// iterate over rows
 	for rows.Next() {
