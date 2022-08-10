@@ -89,3 +89,14 @@ func GetAllDetails() WorkSpaces {
 		UserList:     users.Users,
 	}
 }
+
+func GetCityByFloorId(buildingId int) City {
+	city := City{}
+	rows := migration.DbPool.QueryRow(context.Background(), "select id, name from cities where id = (select city_id from buildings where id = $1)", buildingId)
+	err := rows.Scan(&city.Id, &city.Name)
+	if err != nil {
+		fmt.Println("Failed to get locations record :", err)
+		return City{}
+	}
+	return city
+}

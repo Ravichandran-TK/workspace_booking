@@ -187,4 +187,12 @@ func SetupRoutes(app *fiber.App) {
 		}
 		return c.SendStatus(fiber.StatusForbidden)
 	})
+
+	api.Get("/all_amenities", func(c *fiber.Ctx) error {
+		user := c.Locals("verify")
+		if user == "true" {
+			return controller.AllAmenities(c)
+		}
+		return c.SendStatus(fiber.StatusForbidden)
+	})
 }

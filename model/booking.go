@@ -58,6 +58,13 @@ type Bookings struct {
 }
 
 type AvailableWorkspaces struct {
+	FromDate         string
+	ToDate           string
+	StartTime        string
+	EndTime          string
+	Purpose          string
+	CityId           int
+	CityName         string
 	FloorDetails     Floor
 	BookedWorkSpaces []*BookedWorkSpace
 }

@@ -25,13 +25,14 @@ func GetDbConnectionPool() *pgxpool.Pool {
 	// Don't change the order here
 	CreateRoleTable()
 	CreateUserTable()
-	CreateBookingsTable()
-	CreateBookingParticipantsTable()
 	CreateCityTable()
 	// CreateLocationTable()
 	CreateBuildingTable()
 	CreateFloorTable()
 	CreateWorkspaceTable()
+	CreateAmenityTable()
+	CreateBookingsTable()
+	CreateBookingParticipantsTable()
 	CreateBookingWorkspaceTable()
 
 	return DbPool

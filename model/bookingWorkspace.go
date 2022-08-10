@@ -20,9 +20,10 @@ type BookingWorkspace struct {
 }
 
 type BookingWorkspaceDetail struct {
-	Id            int16  `json:"id"`
-	WorkspaceName string `json:"workspace_name"`
-	WorkspaceType string `json:"workspace_type"`
+	Id                int16  `json:"id"`
+	WorkspaceName     string `json:"workspace_name"`
+	WorkspaceType     string `json:"workspace_type"`
+	WorkspaceCapacity int    `json:"workspace_capacity"`
 }
 
 type BookingWorkspaceDetails struct {
@@ -63,14 +64,14 @@ func BulkInsertBookingWorkspace(booking *Booking, timing *BookingTiming) error {
 }
 
 func GetBookingWorkspacesDetailsByBookingId(bookingId int16) []*BookingWorkspaceDetail {
-	workspaces, e := migration.DbPool.Query(context.Background(), "SELECT workspace_id, (select name from workspaces where id = booking_workspaces.workspace_id) as workspace_name, (select type from workspaces where id = booking_workspaces.workspace_id) as workspace_type from booking_workspaces where booking_id = $1", bookingId)
+	workspaces, e := migration.DbPool.Query(context.Background(), "SELECT workspace_id, (select name from workspaces where id = booking_workspaces.workspace_id) as workspace_name, (select type from workspaces where id = booking_workspaces.workspace_id) as workspace_type, (select capacity from workspaces where id = booking_workspaces.workspace_id) as workspace_capacity from booking_workspaces where booking_id = $1", bookingId)
 
 	defer workspaces.Close()
 	bookingWorkspaceDetails := make([]*BookingWorkspaceDetail, 0)
 
 	for workspaces.Next() {
 		workspace := new(BookingWorkspaceDetail)
-		e = workspaces.Scan(&workspace.Id, &workspace.WorkspaceName, &workspace.WorkspaceType)
+		e = workspaces.Scan(&workspace.Id, &workspace.WorkspaceName, &workspace.WorkspaceType, &workspace.WorkspaceCapacity)
 		bookingWorkspaceDetails = append(bookingWorkspaceDetails, workspace)
 	}
 
