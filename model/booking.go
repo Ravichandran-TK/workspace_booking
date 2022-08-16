@@ -96,12 +96,12 @@ func (b *Booking) InsertBooking() error {
 func GetMyBookingDetails(isForPast bool, userId int) []*BookingDetail {
 	currTime := time.Now()
 	currentDate := config.SqlTimeFormat(currTime)
-	query := "SELECT id, city_id, building_id, floor_id, user_id, (select name from cities where id = bookings.city_id) as city_name, (select name from buildings where id = bookings.building_id) as city_name, (select name from floors where id = bookings.floor_id) as floor_name, (select name from users where id = bookings.user_id) as user_name, from_datetime, to_datetime, purpose, created_at, updated_at FROM bookings WHERE user_id = $1"
+	query := "SELECT id, city_id, building_id, floor_id, user_id, (select name from cities where id = bookings.city_id) as city_name, (select name from buildings where id = bookings.building_id) as city_name, (select name from floors where id = bookings.floor_id) as floor_name, (select name from users where id = bookings.user_id) as user_name, from_datetime, to_datetime, purpose, created_at, updated_at FROM bookings WHERE id in (select booking_id from booking_participants where user_id = $1)"
 	var condition string
 	if isForPast {
-		condition = " AND from_datetime >= $2"
+		condition = " AND from_datetime >= $2 ORDER BY from_datetime ASC"
 	} else {
-		condition = " AND from_datetime < $2"
+		condition = " AND from_datetime < $2  ORDER BY from_datetime DESC"
 	}
 	finalQuery := query + condition
 	// query all bookings data
