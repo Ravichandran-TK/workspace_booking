@@ -10,6 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 
 	"workspace_booking/config"
+	"workspace_booking/mailer"
 	m "workspace_booking/model"
 	"workspace_booking/utility"
 
@@ -51,6 +52,10 @@ func Register(c *fiber.Ctx) error {
 		return utility.ErrResponse(c, "User is already exist", 500, err)
 	}
 
+	if u.ID != 0 {
+		go mailer.UserMailer(u)
+	}
+
 	log.Println("u.pss", u.Password)
 	log.Println(u)
 	return c.JSON(&fiber.Map{
@@ -82,6 +87,12 @@ func Login(c *fiber.Ctx) error {
 		return utility.ErrResponse(c, "Invalid Access!", 401, err)
 	}
 
+	if !(u.VerifiedUser) {
+		c.Status(fiber.StatusNotFound)
+		return c.JSON(fiber.Map{
+			"message": "User not verified please verify",
+		})
+	}
 	if u.ID == 0 {
 		c.Status(fiber.StatusNotFound)
 		return c.JSON(fiber.Map{
@@ -139,5 +150,34 @@ func Logout(c *fiber.Ctx) error {
 	})
 	return c.JSON(fiber.Map{
 		"message": "Successfully logout",
+	})
+}
+
+func VerifyOtp(c *fiber.Ctx) error {
+	u := new(m.User)
+
+	if err := c.BodyParser(u); err != nil {
+		return utility.ErrResponse(c, "Somthing went wrong", 400, err)
+	}
+
+	err := u.VerifyUser()
+
+	if err != nil {
+		return utility.ErrResponse(c, "Invalid OTP", 401, err)
+	}
+
+	if u.ID == 0 {
+		c.Status(fiber.StatusNotFound)
+		return c.JSON(fiber.Map{
+			"message": "Invalid OTP",
+		})
+	}
+	err = u.UpdateVerifyUser()
+
+	if err != nil {
+		return utility.ErrResponse(c, "Somthing went wrong while updating", 401, err)
+	}
+	return c.JSON(fiber.Map{
+		"message": "Successfully verified",
 	})
 }

@@ -17,6 +17,7 @@ func SetupRoutes(app *fiber.App) {
 	// No Auth routes
 	api.Post("/sign-up", controller.Register)
 	api.Post("/sign-in", controller.Login)
+	api.Post("/verify-otp", controller.VerifyOtp)
 
 	api.Get("/roles", controller.AllRoles)
 	api.Post("/roles", controller.CreateRole)

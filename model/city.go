@@ -85,7 +85,7 @@ func GetAllDetails() WorkSpaces {
 		LocationList: locations,
 		BuildingList: buildings,
 		FloorList:    floors,
-		Purpose:      []string{"Team meeting", "Client Call", "Monthly Sync-up", "Others"},
+		Purpose:      []string{"General meeting", "Team meeting", "Client meeting", "Sync-up meeting", "COP meeting", "Others"},
 		UserList:     users.Users,
 	}
 }

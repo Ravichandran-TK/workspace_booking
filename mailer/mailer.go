@@ -48,3 +48,31 @@ func Mailer(to []*model.Recipient, subject, templatePath, message string, templa
 	fmt.Println("Email Sent Successfully!")
 
 }
+
+func SendOtpMail(to []*model.Recipient, subject, message string) {
+	from := config.GetEmailUsername()
+	password := config.GetEmailPassword()
+	smtpHost := config.GetEmailSever()
+	smtpPort, _ := strconv.Atoi(config.GetEmailPort())
+
+	m := gomail.NewMessage()
+
+	addresses := make([]string, len(to))
+	for i, user := range to {
+		addresses[i] = m.FormatAddress(user.Email, user.Name)
+	}
+
+	m.SetHeader("From", config.GetEmailUsername())
+	m.SetHeader("To", addresses...)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/html", message)
+
+	d := gomail.NewDialer(smtpHost, smtpPort, from, password)
+
+	if err := d.DialAndSend(m); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Verification mail Sent Successfully!")
+
+}
