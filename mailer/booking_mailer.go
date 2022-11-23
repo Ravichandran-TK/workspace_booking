@@ -2,6 +2,7 @@ package mailer
 
 import (
 	"os"
+	"strings"
 	"workspace_booking/model"
 )
 
@@ -11,12 +12,19 @@ func BookingMailer(bookingId int16, reminder bool) {
 	particitpants := model.GetBookingParticipantsDetailsByBookingId(bookingId)
 
 	recipients := make([]*model.Recipient, 0)
-
+	bookingData, _ := model.FetchBooking(bookingId)
 	for _, participant := range particitpants {
 		recipient := new(model.Recipient)
 		recipient.Name = participant.UserName
 		recipient.Email = participant.UserEmail
 		recipients = append(recipients, recipient)
+	}
+	commonEmails := strings.SplitAfter(bookingData.CommonEmails, ",")
+	for _, commonEmail := range commonEmails {
+		commonRecipient := new(model.Recipient)
+		commonRecipient.Name = commonEmail
+		commonRecipient.Email = commonEmail
+		recipients = append(recipients, commonRecipient)
 	}
 
 	const (
@@ -24,8 +32,6 @@ func BookingMailer(bookingId int16, reminder bool) {
 		layoutUS   = "Monday, Jan 2 2006"
 		timeLayout = "15:04 PM"
 	)
-
-	bookingData, _ := model.FetchBooking(bookingId)
 
 	subject := "Invitation for " + bookingData.Purpose
 
