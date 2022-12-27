@@ -26,8 +26,14 @@ type FloorWorkSpaces struct {
 }
 
 // GetAllworkspaces will fetch all the roles from roles table
-func GetAllworkspaces(FloorId int) []FloorWorkSpace {
-	rows, err := migration.DbPool.Query(context.Background(), "SELECT * FROM workspaces where floor_id = $1", FloorId)
+func GetAllworkspaces(FloorId int, isCabin bool) []FloorWorkSpace {
+	query := "SELECT * FROM workspaces where floor_id = $1"
+	condition := ""
+	if isCabin {
+		condition = " AND type='cabin'"
+	}
+	finalQuery := query + condition
+	rows, err := migration.DbPool.Query(context.Background(), finalQuery, FloorId)
 	if err != nil {
 		return []FloorWorkSpace{}
 	}

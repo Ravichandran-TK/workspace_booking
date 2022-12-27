@@ -13,6 +13,7 @@ func CreateFloorTable() {
 		name VARCHAR ( 50 ) NOT NULL,
 		total_workspace INTEGER NOT NULL,
 		total_conference INTEGER NOT NULL,
+		total_cabins INTEGER NOT NULL,
 		building_id INTEGER REFERENCES buildings (id),
 		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)

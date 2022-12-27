@@ -34,6 +34,8 @@ func GetDbConnectionPool() *pgxpool.Pool {
 	CreateBookingsTable()
 	CreateBookingParticipantsTable()
 	CreateBookingWorkspaceTable()
+	CreateCabinBookingTable()
+	CreateCabinBookingDetailTable()
 
 	return DbPool
 }

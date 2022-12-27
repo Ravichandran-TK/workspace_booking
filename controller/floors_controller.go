@@ -36,6 +36,9 @@ func CreateFloor(c *fiber.Ctx) error {
 	floorWorkspaceRecords := model.BulkFloorWorkspacesCreate(floor.Id, floor.FloorWorkSpaces)
 	floor.FloorWorkSpaces = floorWorkspaceRecords
 
+	floorCabins := model.BulkFloorWorkspacesCreate(floor.Id, floor.Cabins)
+	floor.Cabins = floorCabins
+
 	// Return Floor in JSON format
 	if err := c.JSON(&fiber.Map{
 		"success": true,

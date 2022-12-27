@@ -212,4 +212,12 @@ func SetupRoutes(app *fiber.App) {
 		}
 		return c.SendStatus(fiber.StatusForbidden)
 	})
+
+	api.Post("/cabin_booking", func(c *fiber.Ctx) error {
+		user := c.Locals("verify")
+		if user == "true" {
+			return controller.CreateCabinBooking(c)
+		}
+		return c.SendStatus(fiber.StatusForbidden)
+	})
 }

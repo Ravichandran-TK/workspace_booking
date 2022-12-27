@@ -13,9 +13,11 @@ type Floor struct {
 	Name            string           `json:"name"`
 	TotalWorkSpace  int              `json:"total_workspace"`
 	TotalConference int              `json:"total_conference"`
+	TotalCabins     int              `json:"total_cabins"`
 	BuildingId      int64            `json:"building_id"`
 	BuildingName    string           `json:"building_name"`
 	FloorWorkSpaces []FloorWorkSpace `json:"workspaces"`
+	Cabins          []FloorWorkSpace `json:"cabins"`
 	CreatedAt       time.Time        `json:"created_at"`
 	UpdatedAt       time.Time        `json:"updated_at"`
 }
@@ -35,8 +37,9 @@ func GetAllFloors() []*Floor {
 	for rows.Next() {
 		floor := new(Floor)
 		err := rows.Scan(&floor.Id, &floor.Name, &floor.TotalWorkSpace, &floor.TotalConference, &floor.BuildingId, &floor.BuildingName, &floor.CreatedAt, &floor.UpdatedAt)
-		allFloorWorkspaces := GetAllworkspaces(floor.Id)
+		allFloorWorkspaces := GetAllworkspaces(floor.Id, false)
 		floor.FloorWorkSpaces = allFloorWorkspaces
+		floor.Cabins = GetAllworkspaces(floor.Id, true)
 		if err != nil {
 			fmt.Println("Failed to get floors record :", err)
 			return []*Floor{}
@@ -48,13 +51,13 @@ func GetAllFloors() []*Floor {
 
 func (floor *Floor) CreateFloor() error {
 	dt := time.Now()
-	query := "INSERT INTO floors (name, total_workspace, total_conference, building_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, created_at, updated_at"
+	query := "INSERT INTO floors (name, total_workspace, total_conference, total_cabins, building_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at, updated_at"
 	building := migration.DbPool.QueryRow(context.Background(), "select name from buildings where id = $1", &floor.BuildingId)
 	err := building.Scan(&floor.BuildingName)
 	if err != nil {
 		return err
 	}
-	d := migration.DbPool.QueryRow(context.Background(), query, &floor.Name, &floor.TotalWorkSpace, &floor.TotalConference, &floor.BuildingId, dt, dt)
+	d := migration.DbPool.QueryRow(context.Background(), query, &floor.Name, &floor.TotalWorkSpace, &floor.TotalConference, &floor.TotalCabins, &floor.BuildingId, dt, dt)
 	err = d.Scan(&floor.Id, &floor.CreatedAt, &floor.UpdatedAt)
 	if err != nil {
 		return err
@@ -66,7 +69,7 @@ func GetFloorByID(floorId int) Floor {
 	floor := Floor{}
 	rows := migration.DbPool.QueryRow(context.Background(), "select floors.id, floors.name, floors.total_workspace, floors.total_conference, floors.building_id, buildings.name as building_name, floors.created_at, floors.updated_at from floors LEFT JOIN buildings ON floors.building_id = buildings.id where floors.id = $1", floorId)
 	err := rows.Scan(&floor.Id, &floor.Name, &floor.TotalWorkSpace, &floor.TotalConference, &floor.BuildingId, &floor.BuildingName, &floor.CreatedAt, &floor.UpdatedAt)
-	allFloorWorkspaces := GetAllworkspaces(floor.Id)
+	allFloorWorkspaces := GetAllworkspaces(floor.Id, false)
 	floor.FloorWorkSpaces = allFloorWorkspaces
 	if err != nil {
 		fmt.Println("Failed to get floors record :", err)

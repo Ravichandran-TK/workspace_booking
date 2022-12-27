@@ -102,3 +102,8 @@ func (u *User) UpdateVerifyUser() error {
 	_, err := migration.DbPool.Exec(context.Background(), "UPDATE users SET otp=$1, verified_user=$2, updated_at=$3 WHERE id=$4", "", true, dt, u.ID)
 	return err
 }
+
+func (user *User) GetUserArraybyId(userId int) error {
+	return migration.DbPool.QueryRow(context.Background(),
+		"SELECT users.id, users.name, users.email FROM users where id=$1", userId).Scan(&user.ID, &user.Name, &user.Email)
+}

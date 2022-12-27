@@ -9,7 +9,7 @@ import (
 
 func BookingMailer(bookingId int16, reminder bool) {
 
-	templatePath := config.GeBookingTemplatePath()
+	templatePath := config.GetBookingTemplatePath()
 	particitpants := model.GetBookingParticipantsDetailsByBookingId(bookingId)
 
 	recipients := make([]*model.Recipient, 0)
@@ -71,5 +71,32 @@ func BookingMailer(bookingId int16, reminder bool) {
 	}
 
 	Mailer(recipients, subject, templatePath, message, templateData)
+
+}
+
+func CabinBookingMailer(cabin *model.CabinBooking, reminder bool) {
+
+	templatePath := config.GetCabinBookingTemplatePath()
+	recipients := make([]*model.Recipient, 0)
+	CabinBookingData := cabin.CabinBookingDetails
+	user := new(model.User)
+	err := user.GetUserArraybyId(cabin.BookedBy)
+	if err != nil {
+		panic(err)
+	}
+	recipient := new(model.Recipient)
+	recipient.Name = user.Name
+	recipient.Email = user.Email
+	recipients = append(recipients, recipient)
+
+	subject := "Confirmation for cabin booking"
+
+	message := "This would informed you that your cabins are booked"
+	templateDate := map[string]interface{}{
+		"CabinBookingData": CabinBookingData,
+		"UserName":         user.Name,
+	}
+
+	Mailer(recipients, subject, templatePath, message, templateDate)
 
 }

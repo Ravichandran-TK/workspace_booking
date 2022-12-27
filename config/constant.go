@@ -28,6 +28,10 @@ func GetCancelBookingTemplatePath() string {
 	return "/text/cancelbooking-template.html"
 }
 
-func GeBookingTemplatePath() string {
+func GetBookingTemplatePath() string {
 	return "/text/email-template.html"
+}
+
+func GetCabinBookingTemplatePath() string {
+	return "/text/cabin-booking-template.html"
 }
